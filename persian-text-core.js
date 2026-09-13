@@ -2,7 +2,11 @@
   'use strict';
 
   const NORMALIZATION_MAP = new Map([
-    ['ي', 'ی'], ['ى', 'ی'], ['ك', 'ک'],
+    ['ي', 'ی'], ['ى', 'ی'], ['ئ', 'ی'],
+    ['ك', 'ک'],
+    ['ۀ', 'هٔ'], ['ة', 'ه'],
+    ['ؤ', 'و'],
+    ['ـ', 'ـ'],
     ['٠', '۰'], ['١', '۱'], ['٢', '۲'], ['٣', '۳'], ['٤', '۴'],
     ['٥', '۵'], ['٦', '۶'], ['٧', '۷'], ['٨', '۸'], ['٩', '۹'],
   ]);
@@ -11,8 +15,9 @@
   const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
 
   function normalizePersianText(value) {
-    let text = String(value ?? '').normalize('NFC');
-    text = text.replace(/[يىك٠-٩]/g, ch => NORMALIZATION_MAP.get(ch) || ch);
+    let text = String(value ?? '');
+    text = text.normalize('NFC');
+    text = text.replace(/[يىئكۀةؤ٠-٩]/g, ch => NORMALIZATION_MAP.get(ch) || ch);
     text = text.replace(/\r\n?/g, '\n');
     text = text.replace(/[ \t]+\n/g, '\n').replace(/\n[ \t]+/g, '\n');
     return text;
@@ -39,7 +44,6 @@
     return true;
   }
 
-  // Capture phase runs before app.js's input handler, so the editor receives clean text.
   document.addEventListener('input', event => {
     if (event.target?.id === 'textInput') normalizeTextarea(event.target);
   }, true);
@@ -50,4 +54,10 @@
     arabicDigitsToPersian,
     latinDigitsToPersian,
   });
+
+  // Load the next typography layer after the existing core without changing app.js.
+  const script = document.createElement('script');
+  script.src = 'typography-enhancements.js';
+  script.defer = true;
+  document.head.appendChild(script);
 })();
