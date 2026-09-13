@@ -2,11 +2,7 @@
   'use strict';
 
   const NORMALIZATION_MAP = new Map([
-    ['ي', 'ی'], ['ى', 'ی'], ['ئ', 'ی'],
-    ['ك', 'ک'],
-    ['ۀ', 'هٔ'], ['ة', 'ه'],
-    ['ؤ', 'و'],
-    ['ـ', 'ـ'],
+    ['ي', 'ی'], ['ى', 'ی'], ['ك', 'ک'],
     ['٠', '۰'], ['١', '۱'], ['٢', '۲'], ['٣', '۳'], ['٤', '۴'],
     ['٥', '۵'], ['٦', '۶'], ['٧', '۷'], ['٨', '۸'], ['٩', '۹'],
   ]);
@@ -15,24 +11,10 @@
   const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
 
   function normalizePersianText(value) {
-    let text = String(value ?? '');
-
-    // Unicode canonical normalization first, then Persian/Arabic code-point cleanup.
-    text = text.normalize('NFC');
-    text = text.replace(/[يىئكۀةؤ٠-٩]/g, ch => NORMALIZATION_MAP.get(ch) || ch);
-
-    // Normalize Arabic punctuation commonly pasted into Persian text.
-    text = text
-      .replace(/،/g, '،')
-      .replace(/؛/g, '؛')
-      .replace(/؟/g, '؟');
-
-    // Convert CRLF/CR to LF so saved documents behave consistently everywhere.
+    let text = String(value ?? '').normalize('NFC');
+    text = text.replace(/[يىك٠-٩]/g, ch => NORMALIZATION_MAP.get(ch) || ch);
     text = text.replace(/\r\n?/g, '\n');
-
-    // Collapse ordinary spaces around newlines without touching intentional ZWNJ.
     text = text.replace(/[ \t]+\n/g, '\n').replace(/\n[ \t]+/g, '\n');
-
     return text;
   }
 
@@ -57,12 +39,11 @@
     return true;
   }
 
-  // Runs before app.js's bubbling input handler, so the editor receives clean Persian text.
+  // Capture phase runs before app.js's input handler, so the editor receives clean text.
   document.addEventListener('input', event => {
     if (event.target?.id === 'textInput') normalizeTextarea(event.target);
   }, true);
 
-  // Public API for future tools and tests.
   window.KhatAvarPersian = Object.freeze({
     normalize: normalizePersianText,
     normalizeTextarea,
