@@ -13,90 +13,35 @@
  <div class="brand"><div class="brand-mark">خ</div><div><strong>خط‌آور</strong><small>استودیوی تایپوگرافی فارسی</small></div></div>
  <div class="project-title"><input id="projectName" value="اثر جدید" aria-label="نام پروژه"></div>
  <div class="top-actions">
-   <button id="newBtn" title="پروژه جدید">＋ جدید</button>
-   <button id="saveBtn">ذخیره</button><button id="projectsBtn">پروژه‌ها</button>
-   <button id="undoBtn" title="واگردانی">↶</button><button id="redoBtn" title="انجام دوباره">↷</button>
-   <button id="practiceBtn" title="حالت تمرین تایپ">⌨ تمرین</button>
+   <button id="newBtn" title="پروژه جدید">＋ جدید</button><button id="saveBtn">ذخیره</button><button id="projectsBtn">پروژه‌ها</button>
+   <button id="undoBtn" title="واگردانی">↶</button><button id="redoBtn" title="انجام دوباره">↷</button><button id="practiceBtn" title="حالت تمرین تایپ">⌨ تمرین</button>
    <button id="exportBtn" class="accent">خروجی</button><button id="themeBtn" title="تغییر روز/شب">◐</button>
  </div>
 </header>
 <main class="workspace">
 <aside class="sidebar left glass">
- <section><div class="section-title"><span>ابزارها</span></div>
-   <button id="addTextBtn" class="tool primary-tool">T <span>متن جدید</span></button>
-   <button id="duplicateBtn" class="tool">⧉ <span>تکثیر</span></button>
-   <button id="deleteBtn" class="tool danger">⌫ <span>حذف</span></button>
- </section>
+ <section><div class="section-title"><span>ابزارها</span></div><button id="addTextBtn" class="tool primary-tool">T <span>متن جدید</span></button><button id="duplicateBtn" class="tool">⧉ <span>تکثیر</span></button><button id="deleteBtn" class="tool danger">⌫ <span>حذف</span></button></section>
  <section class="layers-section"><div class="section-title"><span>لایه‌ها</span><span id="layerCount">۰</span></div><div id="layers" class="layers"></div></section>
 </aside>
 <section class="canvas-area">
- <div class="canvas-toolbar glass">
-   <div class="segmented"><button data-preset="square">مربع</button><button data-preset="portrait">عمودی</button><button data-preset="landscape">افقی</button></div>
-   <div class="zoom"><button id="zoomOut">−</button><span id="zoomLabel">100%</span><button id="zoomIn">+</button><button id="fitBtn">جا دادن</button></div>
-   <button id="fitContentBtn">اندازه از محتوا</button><button id="rulerBtn">رولر</button><button id="bgBtn">پس‌زمینه</button>
- </div>
- <div id="viewport" class="viewport">
-   <div id="rulerTop" class="ruler ruler-top"></div><div id="rulerLeft" class="ruler ruler-left"></div>
-   <div id="artboard" class="artboard">
-    <div id="emptyState" class="empty-state"><div class="empty-icon">خ</div><h2>شروع یک اثر تازه</h2><p>متن خود را وارد کنید و ترکیب‌بندی را بسازید.</p><button id="emptyAdd">افزودن متن</button></div>
-   </div>
- </div>
+ <div class="canvas-toolbar glass"><div class="segmented"><button data-preset="square">مربع</button><button data-preset="portrait">عمودی</button><button data-preset="landscape">افقی</button></div><div class="zoom"><button id="zoomOut">−</button><span id="zoomLabel">100%</span><button id="zoomIn">+</button><button id="fitBtn">جا دادن</button></div><button id="fitContentBtn">اندازه از محتوا</button><button id="rulerBtn">رولر</button><button id="bgBtn">پس‌زمینه</button></div>
+ <div id="viewport" class="viewport"><div id="rulerTop" class="ruler ruler-top"></div><div id="rulerLeft" class="ruler ruler-left"></div><div id="artboard" class="artboard"><div id="emptyState" class="empty-state"><div class="empty-icon">خ</div><h2>شروع یک اثر تازه</h2><p>متن خود را وارد کنید و ترکیب‌بندی را بسازید.</p><button id="emptyAdd">افزودن متن</button></div></div></div>
  <footer class="status glass"><span id="statusText">آماده</span><span id="dimensions">1080 × 1080</span><span id="cursorPos">X: 0 · Y: 0</span></footer>
 </section>
 <aside class="sidebar right glass" id="propertiesPanel">
- <div class="panel-handle" id="panelHandle">ویژگی‌ها ⌃</div>
- <div class="section-title"><span>ویژگی‌ها</span></div>
- <div id="noSelection" class="empty-panel">یک متن را انتخاب کنید تا ویژگی‌های آن نمایش داده شود.</div>
+ <div class="panel-handle" id="panelHandle">ویژگی‌ها ⌃</div><div class="section-title"><span>ویژگی‌ها</span></div><div id="noSelection" class="empty-panel">یک متن را انتخاب کنید تا ویژگی‌های آن نمایش داده شود.</div>
  <div id="properties" hidden>
-  <section class="prop-section"><div class="section-caption">حالت و ساختار</div>
-   <div class="mode-tabs"><button class="mode-btn active" data-mode="full">متن کامل</button><button class="mode-btn" data-mode="word">کلمه‌ها</button></div>
-   <label class="field wide"><span>متن</span><textarea id="textInput" rows="3"></textarea></label>
-   <div class="inline-row"><button id="normalizePersianBtn" type="button">پاکسازی متن فارسی</button></div>
-  </section>
-  <section id="wordSection" class="prop-section" hidden>
-    <div class="section-caption">کلمه‌های مستقل</div>
-    <div id="wordList" class="word-list"></div>
-    <div class="word-help">هر کلمه سند و تنظیمات خودش را دارد؛ انتخاب یک کلمه فقط همان کلمه را تغییر می‌دهد.</div>
-  </section>
-  <section class="prop-section"><div class="section-caption">موقعیت</div><div class="grid2">
-   <label class="field"><span>X</span><input id="xInput" type="number"></label><label class="field"><span>Y</span><input id="yInput" type="number"></label>
-   <label class="field"><span>عرض</span><input id="wInput" type="number" min="20"></label><label class="field"><span>ارتفاع</span><input id="hInput" type="number" min="20"></label>
-  </div></section>
-  <section class="prop-section"><div class="section-caption">تبدیل</div><div class="grid2">
-   <label class="field"><span>چرخش</span><input id="rotationInput" type="number"></label><label class="field"><span>شفافیت</span><input id="opacityInput" type="number" min="0" max="100"></label>
-   <label class="field"><span>مقیاس X</span><input id="scaleXInput" type="number" step=".01" min=".05"></label><label class="field"><span>مقیاس Y</span><input id="scaleYInput" type="number" step=".01" min=".05"></label>
-  </div></section>
-  <section class="prop-section"><div class="section-caption">تایپوگرافی</div>
-   <label class="field wide"><span>فونت</span><select id="fontInput"></select></label>
-   <div class="inline-row"><button id="fontAddBtn">＋ افزودن فونت</button><input id="fontFileInput" type="file" accept=".ttf,.otf,.woff,.woff2" multiple hidden></div>
-   <div class="grid2"><label class="field"><span>اندازه</span><input id="fontSizeInput" type="number" min="6"></label><label class="field"><span>وزن</span><select id="weightInput"><option value="300">300</option><option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option><option value="800">800</option></select></label>
-   <label class="field"><span>فاصله حروف</span><input id="letterSpacingInput" type="number" step=".1"></label><label class="field"><span>ارتفاع خط</span><input id="lineHeightInput" type="number" step=".05" min=".5"></label></div>
-   <div class="inline-row"><button class="align-btn" data-align="right">راست</button><button class="align-btn" data-align="center">وسط</button><button class="align-btn" data-align="left">چپ</button></div>
-   <div class="inline-row"><label class="color-field"><span>رنگ</span><input id="colorInput" type="color"></label><button id="directionBtn">RTL</button></div>
-  </section>
+  <section class="prop-section"><div class="section-caption">حالت و ساختار</div><div class="mode-tabs"><button class="mode-btn active" data-mode="full">متن کامل</button><button class="mode-btn" data-mode="word">کلمه‌ها</button></div><label class="field wide"><span>متن</span><textarea id="textInput" rows="3"></textarea></label><div class="inline-row"><button id="normalizePersianBtn" type="button">پاکسازی متن فارسی</button></div></section>
+  <section id="wordSection" class="prop-section" hidden><div class="section-caption">کلمه‌های مستقل</div><div id="wordList" class="word-list"></div><div class="word-help">هر کلمه سند و تنظیمات خودش را دارد؛ انتخاب یک کلمه فقط همان کلمه را تغییر می‌دهد.</div></section>
+  <section class="prop-section"><div class="section-caption">موقعیت</div><div class="grid2"><label class="field"><span>X</span><input id="xInput" type="number"></label><label class="field"><span>Y</span><input id="yInput" type="number"></label><label class="field"><span>عرض</span><input id="wInput" type="number" min="20"></label><label class="field"><span>ارتفاع</span><input id="hInput" type="number" min="20"></label></div></section>
+  <section class="prop-section"><div class="section-caption">تبدیل</div><div class="grid2"><label class="field"><span>چرخش</span><input id="rotationInput" type="number"></label><label class="field"><span>شفافیت</span><input id="opacityInput" type="number" min="0" max="100"></label><label class="field"><span>مقیاس X</span><input id="scaleXInput" type="number" step=".01" min=".05"></label><label class="field"><span>مقیاس Y</span><input id="scaleYInput" type="number" step=".01" min=".05"></label></div></section>
+  <section class="prop-section"><div class="section-caption">تایپوگرافی</div><label class="field wide"><span>فونت</span><select id="fontInput"></select></label><div class="inline-row"><button id="fontAddBtn">＋ افزودن فونت</button><input id="fontFileInput" type="file" accept=".ttf,.otf,.woff,.woff2" multiple hidden></div><div class="grid2"><label class="field"><span>اندازه</span><input id="fontSizeInput" type="number" min="6"></label><label class="field"><span>وزن</span><select id="weightInput"><option value="300">300</option><option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option><option value="800">800</option></select></label><label class="field"><span>فاصله حروف</span><input id="letterSpacingInput" type="number" step=".1"></label><label class="field"><span>ارتفاع خط</span><input id="lineHeightInput" type="number" step=".05" min=".5"></label></div><div class="inline-row"><button class="align-btn" data-align="right">راست</button><button class="align-btn" data-align="center">وسط</button><button class="align-btn" data-align="left">چپ</button></div><div class="inline-row"><label class="color-field"><span>رنگ</span><input id="colorInput" type="color"></label><button id="directionBtn">RTL</button></div></section>
  </div>
-</aside>
-</main></div>
+</aside></main></div>
 <div id="exportModal" class="modal-backdrop" hidden><div class="modal glass"><button class="modal-close" id="closeExport">×</button><h2>خروجی گرفتن</h2><p>خروجی فقط شامل خود اثر است.</p><div class="export-options"><button data-export="svg">SVG</button><button data-export="png">PNG</button><button data-export="jpg">JPG</button></div></div></div>
 <div id="bgModal" class="modal-backdrop" hidden><div class="modal glass"><button class="modal-close" data-close="bgModal">×</button><h2>پس‌زمینه</h2><div class="bg-tabs"><button data-bg-mode="transparent">شفاف</button><button data-bg-mode="color">رنگ</button><button data-bg-mode="gradient">گرادینت</button></div><div id="bgColorFields" class="bg-fields"><label class="color-field">رنگ اصلی <input id="bgColor" type="color" value="#ffffff"></label><label class="color-field">رنگ دوم <input id="bgColor2" type="color" value="#dfe8ff"></label><label class="field wide"><span>زاویه گرادینت</span><input id="bgAngle" type="range" min="0" max="360" value="135"><output id="bgAngleOut">۱۳۵°</output></label></div></div></div>
 <div id="projectsModal" class="modal-backdrop" hidden><div class="modal glass projects-modal"><button class="modal-close" data-close="projectsModal">×</button><h2>پروژه‌های ذخیره‌شده</h2><p>پروژه‌ها داخل مرورگر این دستگاه نگهداری می‌شوند.</p><div id="projectList" class="project-list"></div></div></div>
 <input id="fontStoreInput" type="file" accept=".ttf,.otf,.woff,.woff2" multiple hidden>
-<script src="persian-text-core.js"></script>
-<script src="app.js"></script>
-<script src="practice-mode.js"></script>
-<script>
-  document.getElementById('normalizePersianBtn')?.addEventListener('click', () => {
-    const textarea = document.getElementById('textInput');
-    if (!textarea || !window.KhatAvarPersian) return;
-    const before = textarea.value;
-    const after = window.KhatAvarPersian.normalize(before);
-    if (before === after) {
-      document.getElementById('statusText').textContent = 'متن از قبل پاک و استاندارد است';
-      return;
-    }
-    textarea.value = after;
-    textarea.dispatchEvent(new Event('input', { bubbles: true }));
-    document.getElementById('statusText').textContent = 'متن فارسی پاکسازی و استاندارد شد';
-  });
-</script>
+<script src="persian-text-core.js"></script><script src="app.js"></script><script src="practice-mode.js"></script><script src="persian-render-engine.js"></script>
+<script>document.getElementById('normalizePersianBtn')?.addEventListener('click',()=>{const textarea=document.getElementById('textInput');if(!textarea||!window.KhatAvarPersian)return;const before=textarea.value,after=window.KhatAvarPersian.normalize(before);if(before===after){document.getElementById('statusText').textContent='متن از قبل پاک و استاندارد است';return}textarea.value=after;textarea.dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('statusText').textContent='متن فارسی پاکسازی و استاندارد شد'});</script>
 </body></html>
