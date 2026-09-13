@@ -50,6 +50,7 @@
   <section class="prop-section"><div class="section-caption">حالت و ساختار</div>
    <div class="mode-tabs"><button class="mode-btn active" data-mode="full">متن کامل</button><button class="mode-btn" data-mode="word">کلمه‌ها</button></div>
    <label class="field wide"><span>متن</span><textarea id="textInput" rows="3"></textarea></label>
+   <div class="inline-row"><button id="normalizePersianBtn" type="button">پاکسازی متن فارسی</button></div>
   </section>
   <section id="wordSection" class="prop-section" hidden>
     <div class="section-caption">کلمه‌های مستقل</div>
@@ -79,5 +80,21 @@
 <div id="bgModal" class="modal-backdrop" hidden><div class="modal glass"><button class="modal-close" data-close="bgModal">×</button><h2>پس‌زمینه</h2><div class="bg-tabs"><button data-bg-mode="transparent">شفاف</button><button data-bg-mode="color">رنگ</button><button data-bg-mode="gradient">گرادینت</button></div><div id="bgColorFields" class="bg-fields"><label class="color-field">رنگ اصلی <input id="bgColor" type="color" value="#ffffff"></label><label class="color-field">رنگ دوم <input id="bgColor2" type="color" value="#dfe8ff"></label><label class="field wide"><span>زاویه گرادینت</span><input id="bgAngle" type="range" min="0" max="360" value="135"><output id="bgAngleOut">۱۳۵°</output></label></div></div></div>
 <div id="projectsModal" class="modal-backdrop" hidden><div class="modal glass projects-modal"><button class="modal-close" data-close="projectsModal">×</button><h2>پروژه‌های ذخیره‌شده</h2><p>پروژه‌ها داخل مرورگر این دستگاه نگهداری می‌شوند.</p><div id="projectList" class="project-list"></div></div></div>
 <input id="fontStoreInput" type="file" accept=".ttf,.otf,.woff,.woff2" multiple hidden>
+<script src="persian-text-core.js"></script>
 <script src="app.js"></script>
+<script>
+  document.getElementById('normalizePersianBtn')?.addEventListener('click', () => {
+    const textarea = document.getElementById('textInput');
+    if (!textarea || !window.KhatAvarPersian) return;
+    const before = textarea.value;
+    const after = window.KhatAvarPersian.normalize(before);
+    if (before === after) {
+      document.getElementById('statusText').textContent = 'متن از قبل پاک و استاندارد است';
+      return;
+    }
+    textarea.value = after;
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    document.getElementById('statusText').textContent = 'متن فارسی پاکسازی و استاندارد شد';
+  });
+</script>
 </body></html>
