@@ -1,0 +1,266 @@
+/* KhatAvar mobile layout — feature-preserving responsive UI */
+@media (max-width: 800px) {
+  :root { --mobile-gap: 8px; --mobile-radius: 16px; }
+  html, body { min-height: 100%; overflow: hidden; }
+  body { overscroll-behavior: none; }
+  .app { min-height: 100dvh; height: 100dvh; }
+
+  /* Header: compact, stable, no clipped controls */
+  .topbar {
+    flex: 0 0 auto;
+    height: 58px;
+    padding: 7px 8px;
+    gap: 8px;
+    overflow: hidden;
+    border-radius: 0;
+  }
+  .brand { min-width: 42px; flex: 0 0 42px; }
+  .brand-mark { width: 42px; height: 42px; border-radius: 13px; }
+  .brand > div:not(.brand-mark), .project-title { display: none; }
+  .top-actions {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    display: flex;
+    justify-content: flex-start;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 2px 1px 4px;
+    scrollbar-width: none;
+    direction: rtl;
+  }
+  .top-actions::-webkit-scrollbar { display: none; }
+  .top-actions button {
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding: 7px 11px;
+    white-space: nowrap;
+    font-size: 11px;
+  }
+
+  /* Main mobile structure: actions -> canvas -> canvas controls. */
+  .workspace {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: calc(100dvh - 58px);
+    gap: var(--mobile-gap);
+    padding: 8px;
+    overflow: hidden;
+  }
+
+  /* Left tools become a compact horizontal action strip. */
+  .left {
+    order: 1;
+    flex: 0 0 auto;
+    display: block;
+    width: 100%;
+    max-height: none;
+    padding: 8px;
+    border-radius: var(--mobile-radius);
+    overflow: hidden;
+  }
+  .left > section:first-child {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    padding-bottom: 1px;
+  }
+  .left > section:first-child::-webkit-scrollbar { display: none; }
+  .left .section-title { display: none; }
+  .left .tool {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 76px;
+    min-height: 42px;
+    margin: 0;
+    justify-content: center;
+    padding: 8px 12px;
+    gap: 6px;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+  .left .tool.primary-tool { min-width: 112px; }
+  .left .tool span { font-size: 11px; }
+  .layers-section {
+    margin-top: 7px;
+    padding-top: 7px;
+    border-top: 1px solid var(--border);
+  }
+  .layers-section .section-title { display: flex; margin: 0 2px 5px; }
+  .layers {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  .layers::-webkit-scrollbar { display: none; }
+  .layer { flex: 0 0 auto; min-width: 128px; min-height: 38px; }
+
+  .canvas-area {
+    order: 2;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    gap: 7px;
+  }
+
+  /* Canvas controls stay in one tidy horizontal rail instead of wrapping. */
+  .canvas-toolbar {
+    flex: 0 0 auto;
+    min-height: 46px;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    border-radius: 14px;
+  }
+  .canvas-toolbar::-webkit-scrollbar { display: none; }
+  .canvas-toolbar > * { flex: 0 0 auto; }
+  .canvas-toolbar button {
+    min-height: 34px;
+    padding: 7px 10px;
+    white-space: nowrap;
+    font-size: 10px;
+  }
+  .segmented, .zoom { flex: 0 0 auto; }
+  .segmented button, .zoom button { min-height: 34px; }
+  .zoom span { min-width: 42px; }
+
+  .viewport {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    border-radius: var(--mobile-radius);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+  }
+  .artboard { flex: 0 0 auto; }
+
+  /* Bigger touch targets without changing the editor's actual hit geometry. */
+  .handle { width: 16px; height: 16px; }
+  .handle.se { right: -8px; bottom: -8px; }
+  .handle.sw { left: -8px; bottom: -8px; }
+  .handle.ne { right: -8px; top: -8px; }
+  .handle.nw { left: -8px; top: -8px; }
+  .rotate-handle { width: 17px; height: 17px; top: -44px; }
+  .rotate-stem { top: -33px; height: 24px; }
+  .text-object, .word-span { touch-action: none; }
+
+  .status {
+    flex: 0 0 auto;
+    height: 30px;
+    padding: 6px 9px;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+  .status::-webkit-scrollbar { display: none; }
+
+  /* Properties is a real bottom sheet; its collapsed state is only a handle. */
+  .right {
+    position: fixed;
+    z-index: 40;
+    left: 7px;
+    right: 7px;
+    bottom: calc(7px + env(safe-area-inset-bottom));
+    top: auto;
+    width: auto;
+    max-height: min(78dvh, 680px);
+    padding: 6px 13px calc(12px + env(safe-area-inset-bottom));
+    border-radius: 20px;
+    transform: translateY(calc(100% - 50px));
+    transition: transform .22s ease;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .right.open { transform: translateY(0); }
+  .panel-handle {
+    display: block;
+    position: sticky;
+    top: -6px;
+    z-index: 5;
+    min-height: 40px;
+    padding: 10px;
+    border-radius: 14px;
+    background: var(--surface);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    cursor: pointer;
+  }
+  .right > .section-title { display: none; }
+  .right .prop-section { padding: 13px 0; }
+  .right .field input,
+  .right .field select,
+  .right .field textarea {
+    min-height: 42px;
+    font-size: 13px;
+  }
+  .right .field textarea { min-height: 86px; }
+  .right .inline-row { gap: 7px; }
+  .right .inline-row button,
+  .right .mode-btn,
+  .right .bg-tabs button {
+    min-height: 42px;
+    font-size: 11px;
+  }
+  .right .grid2 { gap: 8px; }
+  .right .color-field { min-height: 42px; }
+
+  /* Modals fit above browser safe areas and remain scrollable. */
+  .modal-backdrop {
+    padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+  }
+  .modal {
+    width: 100%;
+    max-width: 520px;
+    max-height: calc(100dvh - 20px);
+    overflow: auto;
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+  .export-options { grid-template-columns: 1fr; }
+  .export-options button, .projects-modal button { min-height: 46px; }
+
+  /* Do not let browser zoom / accidental selection interfere with editor gestures. */
+  button, .tool, .layer, .handle, .rotate-handle { -webkit-tap-highlight-color: transparent; }
+  .top-actions button, .canvas-toolbar button, .tool, .layer { touch-action: manipulation; }
+}
+
+@media (max-width: 430px) {
+  .workspace { padding: 6px; gap: 6px; }
+  .topbar { padding-inline: 6px; }
+  .left { padding: 7px; }
+  .left .tool { min-width: 70px; padding-inline: 10px; }
+  .left .tool.primary-tool { min-width: 104px; }
+  .canvas-toolbar button { padding-inline: 9px; }
+  .viewport { padding: 12px; }
+  .right { left: 5px; right: 5px; bottom: calc(5px + env(safe-area-inset-bottom)); }
+}
+
+@media (max-width: 800px) and (orientation: landscape) {
+  .topbar { height: 52px; }
+  .brand-mark { width: 38px; height: 38px; }
+  .workspace { height: calc(100dvh - 52px); }
+  .left { padding: 6px; }
+  .left .tool { min-height: 36px; }
+  .viewport { min-height: 150px; }
+  .right { max-height: 88dvh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .right { transition: none; }
+}
