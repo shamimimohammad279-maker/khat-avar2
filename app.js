@@ -85,16 +85,18 @@ function render(){
  renderLayers();renderRuler();
 }
 function updateInteractionDom(i){
- const el=$(`.text-object[data-id="${CSS.escape(i.o?.id||i.obj?.id||i.w?.id||'')}" ]`);
+ const id=i.o?.id||i.obj?.id;
+ const el=id?document.querySelector('.text-object[data-id="'+CSS.escape(id)+'"]'):null;
  if(i.type==='wordmove'){
-  const box=$(`.text-object[data-id="${CSS.escape(i.o.id)}"]`),ws=box?.querySelector(`.word-span[data-word-id="${CSS.escape(i.w.id)}"]`);
-  if(ws){ws.style.left=i.w.x+'px';ws.style.top=i.w.y+'px';}
-  return;
+  const box=document.querySelector('.text-object[data-id="'+CSS.escape(i.o.id)+'"]');
+  const ws=box?.querySelector('.word-span[data-word-id="'+CSS.escape(i.w.id)+'"]');
+  if(ws){const dx=i.w.x-i.startX,dy=i.w.y-i.startY;ws.style.transform='translate3d('+dx+'px,'+dy+'px,0) rotate('+(i.w.rotation||0)+'deg) scale('+(i.w.scaleX||1)+','+(i.w.scaleY||1)+')'}
+  return
  }
  if(!el)return;
- if(i.type==='move'){el.style.left=i.o.x+'px';el.style.top=i.o.y+'px';}
- else if(i.type==='rotate'){el.style.transform=`rotate(${i.o.rotation}deg) scale(${i.o.scaleX},${i.o.scaleY})`;}
- else if(i.type==='resize'){el.style.left=i.o.x+'px';el.style.top=i.o.y+'px';el.style.width=i.o.width+'px';el.style.height=i.o.height+'px';}
+ if(i.type==='move'){const dx=i.o.x-i.startX,dy=i.o.y-i.startY;el.style.transform='translate3d('+dx+'px,'+dy+'px,0) rotate('+(i.o.rotation||0)+'deg) scale('+(i.o.scaleX||1)+','+(i.o.scaleY||1)+')'}
+ else if(i.type==='rotate')el.style.transform='rotate('+i.o.rotation+'deg) scale('+i.o.scaleX+','+i.o.scaleY+')';
+ else if(i.type==='resize'){el.style.left=i.o.x+'px';el.style.top=i.o.y+'px';el.style.width=i.o.width+'px';el.style.height=i.o.height+'px'}
 }
 function addHandles(el){['nw','ne','sw','se'].forEach(p=>{const h=document.createElement('i');h.className='handle '+p;h.dataset.handle=p;h.onpointerdown=e=>beginResize(e,selectedObj(),p);el.appendChild(h)});const stem=document.createElement('i');stem.className='rotate-stem';el.appendChild(stem);const r=document.createElement('i');r.className='rotate-handle';r.dataset.handle='rotate';r.onpointerdown=e=>beginRotate(e,selectedObj());el.appendChild(r)}
 function renderLayers(){const box=$('layers');box.innerHTML='';[...doc.objects].reverse().forEach(o=>{const row=document.createElement('div');row.className='layer'+(o.id===selected?' active':'');row.innerHTML=`<span>▦</span><span>${escapeHtml(o.name||o.text.slice(0,18)||'متن')}</span><span class="eye">◉</span>`;row.onclick=()=>{selected=o.id;selectedWord=null;render();syncPanel()};box.appendChild(row)})}
@@ -107,17 +109,63 @@ function syncWordPanel(o,w){if(!w)return;setStatus(`کلمه «${w.text}» ان�
 function update(path,val){const o=selectedObj();if(!o)return;const target=o.mode==='word'&&selectedWord?o.words.find(w=>w.id===selectedWord):o;if(!target)return;const before=snapshot();let t=target;for(let i=0;i<path.length-1;i++)t=t[path[i]];t[path[path.length-1]]=val;if(target===o&&path[0]==='text'){autoFitTextObject(o);rebuildWords(o,true)}commit(before);render();syncPanel()}
 function updateSelectedStyle(key,val){const o=selectedObj();if(!o)return;const before=snapshot();if(o.mode==='word'&&selectedWord){const w=o.words.find(x=>x.id===selectedWord);if(!w)return;if(key==='opacity')w.opacity=val;else {w.style[key]=val;w.overrides=w.overrides||{};w.overrides[key]=true}}else o.style[key]=val;commit(before);render();syncPanel()}
 function addText(){const before=snapshot(),o=defaults();o.x=(doc.artboard.width-o.width)/2;o.y=(doc.artboard.height-o.height)/2;doc.objects.push(o);selected=o.id;selectedWord=null;commit(before);render();syncPanel();setStatus('متن اضافه شد')}
-function boardPoint(e){const r=$('artboard').getBoundingClientRect();return{x:(e.clientX-r.left)/zoom,y:(e.clientY-r.top)/zoom}}
+function boardPoint(e,rect=null){const r=rect||interaction?.boardRect||$('artboard').getBoundingClientRect();return{x:(e.clientX-r.left)/zoom,y:(e.clientY-r.top)/zoom}}
 function clearSnapGuides(){document.querySelectorAll('.snap-guide').forEach(g=>g.remove())}
 function snapValue(v,targets,threshold){for(const t of targets)if(Math.abs(v-t)<=threshold)return t;return v}
 function applySnap(o,x,y){if(!rulerOn){clearSnapGuides();return{x,y}}const threshold=10;const targetsX=[{p:0,off:0},{p:doc.artboard.width/2,off:o.width/2},{p:doc.artboard.width,off:o.width}];const targetsY=[{p:0,off:0},{p:doc.artboard.height/2,off:o.height/2},{p:doc.artboard.height,off:o.height}];let nx=x,ny=y,hitX=null,hitY=null;for(const t of targetsX){const d=Math.abs((x+t.off)-t.p);if(d<=threshold&&(hitX===null||d<hitX.d))hitX={d,value:t.p-t.off}}for(const t of targetsY){const d=Math.abs((y+t.off)-t.p);if(d<=threshold&&(hitY===null||d<hitY.d))hitY={d,value:t.p-t.off}}if(hitX)nx=hitX.value;if(hitY)ny=hitY.value;clearSnapGuides();if(hitX){const g=document.createElement('i');g.className='snap-guide vertical';g.style.left=(hitX.value+o.width/2)+'px';$('artboard').appendChild(g)}if(hitY){const g=document.createElement('i');g.className='snap-guide horizontal';g.style.top=(hitY.value+o.height/2)+'px';$('artboard').appendChild(g)}return{x:nx,y:ny}}
-function beginObjectDrag(e,o,el){if(e.target.closest('.handle'))return;if(o.mode==='word'&&e.target.closest('.word-span'))return;e.stopPropagation();const before=snapshot();const changed=selected!==o.id;selected=o.id;selectedWord=null;if(changed){render();syncPanel();el=$(`.text-object[data-id="${CSS.escape(o.id)}"]`)||el}const p=boardPoint(e),ox=o.x,oy=o.y;interaction={type:'move',before,o,obj:o,start:p,ox,oy};e.currentTarget.setPointerCapture?.(e.pointerId);window.addEventListener('pointermove',onPointerMove);window.addEventListener('pointerup',endPointer,{once:true})}
-function beginWordDrag(e,o,w,el){e.stopPropagation();selected=o.id;selectedWord=w.id;const before=snapshot(),p=boardPoint(e),ox=w.x,oy=w.y;interaction={type:'wordmove',before,o,w,start:p,ox,oy};window.addEventListener('pointermove',onPointerMove);window.addEventListener('pointerup',endPointer,{once:true});render();syncPanel()}
+function beginObjectDrag(e,o,el){
+ if(e.target.closest('.handle'))return;if(o.mode==='word'&&e.target.closest('.word-span'))return;e.stopPropagation();
+ const before=snapshot(),changed=selected!==o.id;selected=o.id;selectedWord=null;
+ if(changed){render();syncPanel();el=document.querySelector('.text-object[data-id="'+CSS.escape(o.id)+'"]')||el}
+ const p=boardPoint(e),ox=o.x,oy=o.y;
+ interaction={type:'move',before,o,obj:o,start:p,ox,oy,startX:ox,startY:oy,boardRect:$('artboard').getBoundingClientRect()};
+ el.style.willChange='transform';e.currentTarget.setPointerCapture?.(e.pointerId);
+ window.addEventListener('pointermove',onPointerMove);window.addEventListener('pointerup',endPointer,{once:true})
+}
+function beginWordDrag(e,o,w,el){
+ e.stopPropagation();selected=o.id;selectedWord=w.id;const before=snapshot(),p=boardPoint(e),ox=w.x,oy=w.y;
+ interaction={type:'wordmove',before,o,w,start:p,ox,oy,startX:ox,startY:oy,boardRect:$('artboard').getBoundingClientRect()};
+ el.style.willChange='transform';window.addEventListener('pointermove',onPointerMove);window.addEventListener('pointerup',endPointer,{once:true});render();syncPanel()
+}
 function localPoint(o,p){const a=-(o.rotation||0)*Math.PI/180,cx=o.x+o.width/2,cy=o.y+o.height/2,dx=p.x-cx,dy=p.y-cy;return{x:dx*Math.cos(a)-dy*Math.sin(a)+o.width/2,y:dx*Math.sin(a)+dy*Math.cos(a)+o.height/2}}
-function beginResize(e,o,corner){if(!o)return;e.stopPropagation();const before=snapshot(),p=localPoint(o,boardPoint(e));interaction={type:'resize',before,o,corner,start:p,ox:o.x,oy:o.y,ow:Math.max(30,o.width),oh:Math.max(30,o.height),rot:o.rotation||0};window.addEventListener('pointermove',onPointerMove);window.addEventListener('pointerup',endPointer,{once:true})}
-function beginRotate(e,o){if(!o)return;e.stopPropagation();const before=snapshot(),p=boardPoint(e),cx=o.x+o.width/2,cy=o.y+o.height/2;interaction={type:'rotate',before,o,cx,cy,startAngle:Math.atan2(p.y-cy,p.x-cx),startRot:o.rotation};window.addEventListener('pointermove',onPointerMove);window.addEventListener('pointerup',endPointer,{once:true})}
-let interactionFrame=0,interactionEvent=null;function processInteraction(){interactionFrame=0;if(!interaction||!interactionEvent)return;const e=interactionEvent,i=interaction;interactionEvent=null;const p=boardPoint(e);if(i.type==='move'){const q=applySnap(i.o,i.ox+(p.x-i.start.x),i.oy+(p.y-i.start.y));i.o.x=q.x;i.o.y=q.y}else if(i.type==='wordmove'){i.w.x=i.ox+(p.x-i.start.x);i.w.y=i.oy+(p.y-i.start.y)}else if(i.type==='rotate'){const a=Math.atan2(p.y-i.cy,p.x-i.cx);i.o.rotation=i.startRot+(a-i.startAngle)*180/Math.PI}else if(i.type==='resize'){const lp=localPoint(i.o,p),dx=lp.x-i.start.x,dy=lp.y-i.start.y;let left=0,top=0,right=i.ow,bottom=i.oh;if(i.corner.includes('e'))right=Math.max(left+30,i.ow+dx);if(i.corner.includes('s'))bottom=Math.max(top+30,i.oh+dy);if(i.corner.includes('w'))left=Math.min(i.ow-30,i.start.x+dx);if(i.corner.includes('n'))top=Math.min(i.oh-30,i.start.y+dy);const nw=Math.max(30,right-left),nh=Math.max(30,bottom-top);const localCx=(left+right)/2,localCy=(top+bottom)/2;const boardCx=i.ox+i.ow/2,boardCy=i.oy+i.oh/2;const a=i.rot*Math.PI/180;const centerShiftX=localCx-i.ow/2,centerShiftY=localCy-i.oh/2;const worldShiftX=centerShiftX*Math.cos(a)-centerShiftY*Math.sin(a),worldShiftY=centerShiftX*Math.sin(a)+centerShiftY*Math.cos(a);i.o.width=nw;i.o.height=nh;i.o.x=boardCx+worldShiftX-nw/2;i.o.y=boardCy+worldShiftY-nh/2}updateInteractionDom(i)}function onPointerMove(e){if(!interaction)return;interactionEvent=e;if(!interactionFrame)interactionFrame=requestAnimationFrame(processInteraction)}
-function endPointer(){if(!interaction)return;if(interactionFrame){cancelAnimationFrame(interactionFrame);interactionFrame=0}if(interactionEvent){processInteraction()}commit(interaction.before);interaction=null;interactionEvent=null;window.removeEventListener('pointermove',onPointerMove);clearSnapGuides();render();syncPanel()}
+function localPointFromGeometry(g,p){const a=-g.rot*Math.PI/180,cx=g.x+g.width/2,cy=g.y+g.height/2,dx=p.x-cx,dy=p.y-cy;return{x:dx*Math.cos(a)-dy*Math.sin(a)+g.width/2,y:dx*Math.sin(a)+dy*Math.cos(a)+g.height/2}}
+function beginResize(e,o,corner){
+ if(!o)return;e.stopPropagation();const before=snapshot(),rect=$('artboard').getBoundingClientRect(),p=boardPoint(e,rect);
+ interaction={type:'resize',before,o,corner,start:p,ox:o.x,oy:o.y,ow:Math.max(30,o.width),oh:Math.max(30,o.height),rot:o.rotation||0,startGeometry:{x:o.x,y:o.y,width:Math.max(30,o.width),height:Math.max(30,o.height),rot:o.rotation||0},boardRect:rect};
+ const el=document.querySelector('.text-object[data-id="'+CSS.escape(o.id)+'"]');if(el)el.style.willChange='left,top,width,height';
+ window.addEventListener('pointermove',onPointerMove);window.addEventListener('pointerup',endPointer,{once:true})
+}
+function beginRotate(e,o){
+ if(!o)return;e.stopPropagation();const before=snapshot(),rect=$('artboard').getBoundingClientRect(),p=boardPoint(e,rect),cx=o.x+o.width/2,cy=o.y+o.height/2;
+ interaction={type:'rotate',before,o,cx,cy,startAngle:Math.atan2(p.y-cy,p.x-cx),startRot:o.rotation,startX:o.x,startY:o.y,boardRect:rect};
+ const el=document.querySelector('.text-object[data-id="'+CSS.escape(o.id)+'"]');if(el)el.style.willChange='transform';
+ window.addEventListener('pointermove',onPointerMove);window.addEventListener('pointerup',endPointer,{once:true})
+}
+let interactionFrame=0,interactionEvent=null;function processInteraction(){
+ interactionFrame=0;if(!interaction||!interactionEvent)return;
+ const e=interactionEvent,i=interaction;interactionEvent=null;const p=boardPoint(e,i.boardRect);
+ if(i.type==='move'){const q=applySnap(i.o,i.ox+(p.x-i.start.x),i.oy+(p.y-i.start.y));i.o.x=q.x;i.o.y=q.y}
+ else if(i.type==='wordmove'){i.w.x=i.ox+(p.x-i.start.x);i.w.y=i.oy+(p.y-i.start.y)}
+ else if(i.type==='rotate'){const aa=Math.atan2(p.y-i.cy,p.x-i.cx);i.o.rotation=i.startRot+(aa-i.startAngle)*180/Math.PI}
+ else if(i.type==='resize'){
+  const g=i.startGeometry,lp=localPointFromGeometry(g,p),dx=lp.x-i.start.x,dy=lp.y-i.start.y;
+  let left=0,top=0,right=g.width,bottom=g.height;
+  if(i.corner.includes('e'))right=Math.max(left+30,g.width+dx);if(i.corner.includes('s'))bottom=Math.max(top+30,g.height+dy);
+  if(i.corner.includes('w'))left=Math.min(g.width-30,i.start.x+dx);if(i.corner.includes('n'))top=Math.min(g.height-30,i.start.y+dy);
+  const nw=Math.max(30,right-left),nh=Math.max(30,bottom-top),lcx=(left+right)/2,lcy=(top+bottom)/2,bcx=g.x+g.width/2,bcy=g.y+g.height/2,ang=g.rot*Math.PI/180;
+  const sx=lcx-g.width/2,sy=lcy-g.height/2,wx=sx*Math.cos(ang)-sy*Math.sin(ang),wy=sx*Math.sin(ang)+sy*Math.cos(ang);
+  i.o.width=nw;i.o.height=nh;i.o.x=bcx+wx-nw/2;i.o.y=bcy+wy-nh/2
+ }
+ updateInteractionDom(i)
+}
+function onPointerMove(e){if(!interaction)return;interactionEvent=e;if(!interactionFrame)interactionFrame=requestAnimationFrame(processInteraction)}
+function endPointer(){
+ if(!interaction)return;if(interactionFrame){cancelAnimationFrame(interactionFrame);interactionFrame=0}if(interactionEvent)processInteraction();
+ const i=interaction;commit(i.before);interaction=null;interactionEvent=null;window.removeEventListener('pointermove',onPointerMove);clearSnapGuides();
+ const el=document.querySelector('.text-object[data-id="'+CSS.escape(i.o?.id||i.obj?.id||'')+'"]');if(el)el.style.willChange='auto';
+ render();syncPanel()
+}
+
 $('viewport').addEventListener('pointerdown',e=>{if(e.target===$('viewport')||e.target.classList.contains('ruler')){selected=null;selectedWord=null;render();syncPanel()}});
 $('viewport').addEventListener('pointermove',e=>{const p=boardPoint(e);$('cursorPos').textContent=`X: ${Math.round(p.x)} · Y: ${Math.round(p.y)}`});
 $('addTextBtn').onclick=addText;$('emptyAdd').onclick=addText;
