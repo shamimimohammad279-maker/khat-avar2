@@ -87,14 +87,16 @@ function render(){
 function updateInteractionDom(i){
  const id=i.o?.id||i.obj?.id;
  const el=id?document.querySelector('.text-object[data-id="'+CSS.escape(id)+'"]'):null;
- if(i.type==='wordmove'){
+ if(i.type==='wordmove'||i.type==='wordrotate'){
   const box=document.querySelector('.text-object[data-id="'+CSS.escape(i.o.id)+'"]');
   const ws=box?.querySelector('.word-span[data-word-id="'+CSS.escape(i.w.id)+'"]');
-  if(ws){const dx=i.w.x-i.startX,dy=i.w.y-i.startY;ws.style.transform='translate3d('+dx+'px,'+dy+'px,0) rotate('+(i.w.rotation||0)+'deg) scale('+(i.w.scaleX||1)+','+(i.w.scaleY||1)+')'}
+  if(!ws)return;
+  if(i.type==='wordmove'){ws.style.left=i.w.x+'px';ws.style.top=i.w.y+'px'}
+  else ws.style.transform='rotate('+i.w.rotation+'deg) scale('+i.w.scaleX+','+i.w.scaleY+')';
   return
  }
  if(!el)return;
- if(i.type==='move'){const dx=i.o.x-i.startX,dy=i.o.y-i.startY;el.style.transform='translate3d('+dx+'px,'+dy+'px,0) rotate('+(i.o.rotation||0)+'deg) scale('+(i.o.scaleX||1)+','+(i.o.scaleY||1)+')'}
+ if(i.type==='move'){el.style.left=i.o.x+'px';el.style.top=i.o.y+'px'}
  else if(i.type==='rotate')el.style.transform='rotate('+i.o.rotation+'deg) scale('+i.o.scaleX+','+i.o.scaleY+')';
  else if(i.type==='resize'){el.style.left=i.o.x+'px';el.style.top=i.o.y+'px';el.style.width=i.o.width+'px';el.style.height=i.o.height+'px'}
 }
@@ -103,7 +105,15 @@ function renderLayers(){const box=$('layers');box.innerHTML='';[...doc.objects].
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function wordEffectiveStyle(o,w){const st={...o.style};for(const k of Object.keys(w.overrides||{}))st[k]=w.style[k];return st}
 function wordsHaveOverrides(o){return (o.words||[]).some(w=>Object.keys(w.overrides||{}).length||w.rotation||w.scaleX!==1||w.scaleY!==1||w.x||w.y)}
-function syncPanel(){const o=selectedObj(),p=$('properties');$('noSelection').hidden=!!o;p.hidden=!o;if(!o)return;const w=o.mode==='word'&&selectedWord?o.words.find(x=>x.id===selectedWord):null;const t=w||o;const st=t.style;$('textInput').value=o.text;$('textInput').dir=o.style.direction;$('xInput').value=Math.round(t.x);$('yInput').value=Math.round(t.y);$('wInput').value=Math.round(t.width);$('hInput').value=Math.round(t.height);$('rotationInput').value=Math.round(t.rotation);$('opacityInput').value=Math.round((w?(w.opacity??1):o.opacity)*100);$('scaleXInput').value=t.scaleX.toFixed(2);$('scaleYInput').value=t.scaleY.toFixed(2);$('fontInput').value=st.fontFamily;$('fontSizeInput').value=st.fontSize;$('weightInput').value=st.fontWeight;$('letterSpacingInput').value=st.letterSpacing;$('lineHeightInput').value=st.lineHeight;$('colorInput').value=st.color;$('directionBtn').textContent=st.direction.toUpperCase();document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===o.mode));$('wordSection').hidden=o.mode!=='word';if(o.mode==='word')renderWordList(o);addHandles($(`.text-object[data-id="${CSS.escape(o.id)}"]`))}
+function syncPanel(){const o=selectedObj(),p=$('properties');$('noSelection').hidden=!!o;p.hidden=!o;if(!o)return;const w=o.mode==='word'&&selectedWord?o.words.find(x=>x.id===selectedWord):null;const t=w||o;const st=t.style;$('textInput').value=o.text;$('textInput').dir=o.style.direction;$('xInput').value=Math.round(t.x);$('yInput').value=Math.round(t.y);$('wInput').value=Math.round(t.width);$('hInput').value=Math.round(t.height);$('rotationInput').value=Math.round(t.rotation);$('opacityInput').value=Math.round((w?(w.opacity??1):o.opacity)*100);$('scaleXInput').value=t.scaleX.toFixed(2);$('scaleYInput').value=t.scaleY.toFixed(2);$('fontInput').value=st.fontFamily;$('fontSizeInput').value=st.fontSize;$('weightInput').value=st.fontWeight;$('letterSpacingInput').value=st.letterSpacing;$('lineHeightInput').value=st.lineHeight;$('colorInput').value=st.color;$('directionBtn').textContent=st.direction.toUpperCase();document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===o.mode));$('wordSection').hidden=o.mode!=='word';if(o.mode==='word')renderWordList(o);
+ const selectedEl=$(`.text-object[data-id="${CSS.escape(o.id)}"]`);
+ if(w){
+  const ws=selectedEl?.querySelector(`.word-span[data-word-id="${CSS.escape(w.id)}"]`);
+  if(ws&&!ws.querySelector('.rotate-handle')){
+   const stem=document.createElement('i');stem.className='rotate-stem';ws.appendChild(stem);
+   const rh=document.createElement('i');rh.className='rotate-handle';rh.onpointerdown=e=>beginWordRotate(e,o,w);ws.appendChild(rh);
+  }
+ }else addHandles(selectedEl)}
 function renderWordList(o){const box=$('wordList');box.innerHTML='';o.words.forEach((w,i)=>{const b=document.createElement('button');b.className='word-chip'+(w.id===selectedWord?' active':'');b.textContent=w.text;b.onclick=()=>{selectedWord=w.id;render();syncWordPanel(o,w)};box.appendChild(b)})}
 function syncWordPanel(o,w){if(!w)return;setStatus(`کلمه «${w.text}» انتخاب شد`);}
 function update(path,val){const o=selectedObj();if(!o)return;const target=o.mode==='word'&&selectedWord?o.words.find(w=>w.id===selectedWord):o;if(!target)return;const before=snapshot();let t=target;for(let i=0;i<path.length-1;i++)t=t[path[i]];t[path[path.length-1]]=val;if(target===o&&path[0]==='text'){autoFitTextObject(o);rebuildWords(o,true)}commit(before);render();syncPanel()}
@@ -141,12 +151,20 @@ function beginRotate(e,o){
  const el=document.querySelector('.text-object[data-id="'+CSS.escape(o.id)+'"]');if(el)el.style.willChange='transform';
  window.addEventListener('pointermove',onPointerMove);window.addEventListener('pointerup',endPointer,{once:true})
 }
+function beginWordRotate(e,o,w){
+ if(!o||!w)return;e.stopPropagation();
+ const before=snapshot(),rect=$('artboard').getBoundingClientRect(),p=boardPoint(e,rect),cx=w.x+w.width/2,cy=w.y+w.height/2;
+ interaction={type:'wordrotate',before,o,w,cx,cy,startAngle:Math.atan2(p.y-cy,p.x-cx),startRot:w.rotation||0,boardRect:rect};
+ const el=document.querySelector('.word-span[data-word-id="'+CSS.escape(w.id)+'"]');if(el)el.style.willChange='transform';
+ window.addEventListener('pointermove',onPointerMove);window.addEventListener('pointerup',endPointer,{once:true})
+}
 let interactionFrame=0,interactionEvent=null;function processInteraction(){
  interactionFrame=0;if(!interaction||!interactionEvent)return;
  const e=interactionEvent,i=interaction;interactionEvent=null;const p=boardPoint(e,i.boardRect);
  if(i.type==='move'){const q=applySnap(i.o,i.ox+(p.x-i.start.x),i.oy+(p.y-i.start.y));i.o.x=q.x;i.o.y=q.y}
  else if(i.type==='wordmove'){i.w.x=i.ox+(p.x-i.start.x);i.w.y=i.oy+(p.y-i.start.y)}
  else if(i.type==='rotate'){const aa=Math.atan2(p.y-i.cy,p.x-i.cx);i.o.rotation=i.startRot+(aa-i.startAngle)*180/Math.PI}
+ else if(i.type==='wordrotate'){const aa=Math.atan2(p.y-i.cy,p.x-i.cx);i.w.rotation=i.startRot+(aa-i.startAngle)*180/Math.PI}
  else if(i.type==='resize'){
   const g=i.startGeometry,lp=localPointFromGeometry(g,p),dx=lp.x-i.start.x,dy=lp.y-i.start.y;
   let left=0,top=0,right=g.width,bottom=g.height;
@@ -162,7 +180,8 @@ function onPointerMove(e){if(!interaction)return;interactionEvent=e;if(!interact
 function endPointer(){
  if(!interaction)return;if(interactionFrame){cancelAnimationFrame(interactionFrame);interactionFrame=0}if(interactionEvent)processInteraction();
  const i=interaction;commit(i.before);interaction=null;interactionEvent=null;window.removeEventListener('pointermove',onPointerMove);clearSnapGuides();
- const el=document.querySelector('.text-object[data-id="'+CSS.escape(i.o?.id||i.obj?.id||'')+'"]');if(el)el.style.willChange='auto';
+ const id=i.o?.id||i.obj?.id;const el=id?document.querySelector('.text-object[data-id="'+CSS.escape(id)+'"]'):null;if(el)el.style.willChange='auto';
+ if(i.type==='wordmove'||i.type==='wordrotate'){const ws=document.querySelector('.word-span[data-word-id="'+CSS.escape(i.w.id)+'"]');if(ws)ws.style.willChange='auto'}
  render();syncPanel()
 }
 
