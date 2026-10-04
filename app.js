@@ -118,6 +118,30 @@ function renderWordList(o){const box=$('wordList');box.innerHTML='';o.words.forE
 function syncWordPanel(o,w){if(!w)return;setStatus(`کلمه «${w.text}» انتخاب شد`);}
 function update(path,val){const o=selectedObj();if(!o)return;const target=o.mode==='word'&&selectedWord?o.words.find(w=>w.id===selectedWord):o;if(!target)return;const before=snapshot();let t=target;for(let i=0;i<path.length-1;i++)t=t[path[i]];t[path[path.length-1]]=val;if(target===o&&path[0]==='text'){autoFitTextObject(o);rebuildWords(o,true)}commit(before);render();syncPanel()}
 function updateSelectedStyle(key,val){const o=selectedObj();if(!o)return;const before=snapshot();if(o.mode==='word'&&selectedWord){const w=o.words.find(x=>x.id===selectedWord);if(!w)return;if(key==='opacity')w.opacity=val;else {w.style[key]=val;w.overrides=w.overrides||{};w.overrides[key]=true}}else o.style[key]=val;commit(before);render();syncPanel()}
+function applyAIText(text){
+ const o=selectedObj();
+ if(!o||typeof text!=='string')return false;
+ const value=text.trim();
+ if(!value)return false;
+ const before=snapshot();
+ if(o.mode==='word'&&selectedWord){
+  const w=o.words.find(x=>x.id===selectedWord);
+  if(!w)return false;
+  w.text=value;
+ }else{
+  o.text=value;
+  autoFitTextObject(o);
+  rebuildWords(o,true);
+  layoutWords(o);
+ }
+ commit(before);render();syncPanel();setStatus('نتیجه هوش مصنوعی روی متن اعمال شد');
+ return true;
+}
+window.KhatAvarAI=Object.freeze({
+ getSelectedText:()=>{const o=selectedObj();if(!o)return null;if(o.mode==='word'&&selectedWord){return o.words.find(x=>x.id===selectedWord)?.text||''}return o.text||''},
+ applyText:applyAIText,
+ hasSelection:()=>!!selectedObj()
+});
 function addText(){const before=snapshot(),o=defaults();o.x=(doc.artboard.width-o.width)/2;o.y=(doc.artboard.height-o.height)/2;doc.objects.push(o);selected=o.id;selectedWord=null;commit(before);render();syncPanel();setStatus('متن اضافه شد')}
 function boardPoint(e,rect=null){const r=rect||interaction?.boardRect||$('artboard').getBoundingClientRect();return{x:(e.clientX-r.left)/zoom,y:(e.clientY-r.top)/zoom}}
 function clearSnapGuides(){document.querySelectorAll('.snap-guide').forEach(g=>g.remove())}
