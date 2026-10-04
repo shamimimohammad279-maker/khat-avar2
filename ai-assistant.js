@@ -1,0 +1,11 @@
+(()=>{'use strict';
+const $=id=>document.getElementById(id);let action='improve',resultText='',busy=false;
+function open(){const text=window.KhatAvarAI?.getSelectedText?.()||'';$('aiModal').hidden=false;$('aiInputPreview').textContent=text||'متنی انتخاب نشده است';$('aiPrompt').value='';$('aiResultWrap').hidden=true;$('aiError').hidden=true;$('aiApply').disabled=true;$('aiCopy').disabled=true;resultText='';setAction(action)}
+function close(){$('aiModal').hidden=true}
+function setAction(next){action=next;document.querySelectorAll('[data-ai-action]').forEach(b=>b.classList.toggle('active',b.dataset.aiAction===action))}
+function error(m){$('aiError').textContent=m;$('aiError').hidden=false}
+async function run(){if(busy)return;const text=window.KhatAvarAI?.getSelectedText?.()||'';if(!text){error('ابتدا یک متن روی بوم انتخاب کنید.');return}busy=true;$('aiLoading').hidden=false;$('aiError').hidden=true;$('aiResultWrap').hidden=true;$('aiApply').disabled=true;$('aiCopy').disabled=true;try{const res=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,text,prompt:$('aiPrompt').value.trim()})});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'درخواست هوش مصنوعی ناموفق بود.');resultText=String(data.text||'').trim();$('aiResult').textContent=resultText;$('aiResultWrap').hidden=false;$('aiCopy').disabled=!resultText;$('aiApply').disabled=action==='analyze'||action==='variants'||!resultText}catch(e){error(e.message||'ارتباط با هوش مصنوعی برقرار نشد.')}finally{busy=false;$('aiLoading').hidden=true}}
+function apply(){if(!resultText||action==='analyze'||action==='variants')return;if(window.KhatAvarAI?.applyText?.(resultText))close()}
+async function copy(){if(!resultText)return;try{await navigator.clipboard.writeText(resultText);$('statusText').textContent='نتیجه AI کپی شد'}catch{}}
+$('aiBtn').onclick=open;$('closeAi').onclick=close;document.querySelectorAll('[data-ai-action]').forEach(b=>b.onclick=()=>{setAction(b.dataset.aiAction);run()});$('aiApply').onclick=apply;$('aiCopy').onclick=copy;$('aiModal').addEventListener('click',e=>{if(e.target===$('aiModal'))close()});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('aiModal').hidden)close()});
+})();
