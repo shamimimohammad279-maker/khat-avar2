@@ -127,7 +127,10 @@ function applyAIText(text){
  if(o.mode==='word'&&selectedWord){
   const w=o.words.find(x=>x.id===selectedWord);
   if(!w)return false;
+  const oldValue=w.text;
   w.text=value;
+  const at=o.text.indexOf(oldValue);
+  if(at>=0)o.text=o.text.slice(0,at)+value+o.text.slice(at+oldValue.length);
  }else{
   o.text=value;
   autoFitTextObject(o);
