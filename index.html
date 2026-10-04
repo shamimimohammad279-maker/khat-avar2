@@ -16,7 +16,7 @@
  <div class="top-actions">
    <button id="newBtn" title="پروژه جدید">＋ جدید</button><button id="saveBtn">ذخیره</button><button id="projectsBtn">پروژه‌ها</button>
    <button id="undoBtn" title="واگردانی">↶</button><button id="redoBtn" title="انجام دوباره">↷</button><button id="practiceBtn" title="حالت تمرین تایپ">⌨ تمرین</button>
-   <button id="exportBtn" class="accent">خروجی</button><button id="themeBtn" title="تغییر روز/شب">◐</button>
+   <button id="exportBtn" class="accent">خروجی</button><button id="aiBtn" class="ai-top-btn" title="دستیار هوشمند">✦ AI</button><button id="themeBtn" title="تغییر روز/شب">◐</button>
  </div>
 </header>
 <main class="workspace">
@@ -42,7 +42,26 @@
 <div id="exportModal" class="modal-backdrop" hidden><div class="modal glass"><button class="modal-close" id="closeExport">×</button><h2>خروجی گرفتن</h2><p>خروجی فقط شامل خود اثر است.</p><div class="export-options"><button data-export="svg">SVG</button><button data-export="png">PNG</button><button data-export="jpg">JPG</button></div></div></div>
 <div id="bgModal" class="modal-backdrop" hidden><div class="modal glass"><button class="modal-close" data-close="bgModal">×</button><h2>پس‌زمینه</h2><div class="bg-tabs"><button data-bg-mode="transparent">شفاف</button><button data-bg-mode="color">رنگ</button><button data-bg-mode="gradient">گرادینت</button></div><div id="bgColorFields" class="bg-fields"><label class="color-field">رنگ اصلی <input id="bgColor" type="color" value="#ffffff"></label><label class="color-field">رنگ دوم <input id="bgColor2" type="color" value="#dfe8ff"></label><label class="field wide"><span>زاویه گرادینت</span><input id="bgAngle" type="range" min="0" max="360" value="135"><output id="bgAngleOut">۱۳۵°</output></label></div></div></div>
 <div id="projectsModal" class="modal-backdrop" hidden><div class="modal glass projects-modal"><button class="modal-close" data-close="projectsModal">×</button><h2>پروژه‌های ذخیره‌شده</h2><p>پروژه‌ها داخل مرورگر این دستگاه نگهداری می‌شوند.</p><div id="projectList" class="project-list"></div></div></div>
+<div id="aiModal" class="modal-backdrop ai-modal-backdrop" hidden>
+ <div class="modal glass ai-modal">
+  <button class="modal-close" id="closeAi">×</button>
+  <div class="ai-header"><div class="ai-orb">✦</div><div><h2>دستیار هوشمند خط‌آور</h2><p>متن انتخاب‌شده را برای تایپوگرافی فارسی آماده کن.</p></div></div>
+  <div class="ai-actions">
+   <button data-ai-action="normalize">پاکسازی متن</button>
+   <button data-ai-action="improve">بهبود برای تایپوگرافی</button>
+   <button data-ai-action="shorten">کوتاه‌کردن</button>
+   <button data-ai-action="variants">چند پیشنهاد</button>
+   <button data-ai-action="analyze">تحلیل تایپوگرافی</button>
+  </div>
+  <label class="field wide ai-prompt-field"><span>دستور دلخواه (اختیاری)</span><textarea id="aiPrompt" rows="2" placeholder="مثلاً: لحن رسمی و مینیمال باشد"></textarea></label>
+  <div class="ai-context"><span>متن ورودی</span><strong id="aiInputPreview">—</strong></div>
+  <div id="aiLoading" class="ai-loading" hidden><span class="ai-spinner"></span>در حال فکر کردن...</div>
+  <div id="aiResultWrap" class="ai-result-wrap" hidden><div class="ai-result-title">نتیجه</div><div id="aiResult" class="ai-result" dir="rtl"></div></div>
+  <div class="ai-footer"><button id="aiApply" class="accent" disabled>اعمال روی متن</button><button id="aiCopy" disabled>کپی</button></div>
+  <div id="aiError" class="ai-error" hidden></div>
+ </div>
+</div>
 <input id="fontStoreInput" type="file" accept=".ttf,.otf,.woff,.woff2" multiple hidden>
-<script src="persian-text-core.js"></script><script src="app.js"></script><script src="practice-mode.js"></script><script src="persian-render-engine.js"></script>
+<script src="persian-text-core.js"></script><script src="app.js"></script><script src="ai-assistant.js"></script><script src="practice-mode.js"></script><script src="persian-render-engine.js"></script>
 <script>document.getElementById('normalizePersianBtn')?.addEventListener('click',()=>{const textarea=document.getElementById('textInput');if(!textarea||!window.KhatAvarPersian)return;const before=textarea.value,after=window.KhatAvarPersian.normalize(before);if(before===after){document.getElementById('statusText').textContent='متن از قبل پاک و استاندارد است';return}textarea.value=after;textarea.dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('statusText').textContent='متن فارسی پاکسازی و استاندارد شد'});</script>
 </body></html>
