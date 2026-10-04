@@ -7,6 +7,17 @@ const ACTIONS = {
   variants: 'سه نسخه متفاوت و کوتاه برای استفاده در تایپوگرافی پیشنهاد بده. هر نسخه در یک خط جدا باشد و هیچ توضیح اضافه‌ای نده.',
   analyze: 'متن را از نظر طول، ریتم، خوانایی، شکست سطر، لحن و مناسب‌بودن برای تایپوگرافی فارسی تحلیل کن. چند پیشنهاد عملی و کوتاه بده.'
 };
+const hits=new Map();
+const RATE_WINDOW=60_000;
+const RATE_LIMIT=12;
+function allowed(request){
+ const key=(request.headers.get('x-forwarded-for')||request.headers.get('x-real-ip')||'unknown').split(',')[0].trim();
+ const now=Date.now();
+ const old=hits.get(key)||[];
+ const fresh=old.filter(t=>now-t<RATE_WINDOW);
+ if(fresh.length>=RATE_LIMIT){hits.set(key,fresh);return false}
+ fresh.push(now);hits.set(key,fresh);return true;
+}
 const SYSTEM=`تو دستیار هوشمند تایپوگرافی فارسی در نرم‌افزار خط‌آور هستی.
 روی کیفیت متن فارسی، خوانایی، ایجاز، ریتم بصری و مناسب‌بودن متن برای طراحی تمرکز کن.
 به درخواست کاربر وفادار باش و از اضافه‌گویی پرهیز کن.
@@ -14,6 +25,7 @@ const SYSTEM=`تو دستیار هوشمند تایپوگرافی فارسی د�
 
 export default async function handler(request,response){
  if(request.method!=='POST')return response.status(405).json({error:'Method not allowed'});
+ if(!allowed(request))return response.status(429).json({error:'تعداد درخواست‌های AI زیاد است؛ کمی بعد دوباره امتحان کنید.'});
  const key=process.env.OPENAI_API_KEY;
  if(!key)return response.status(503).json({error:'کلید هوش مصنوعی روی سرور تنظیم نشده است.'});
  try{
